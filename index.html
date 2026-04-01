@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PEACE | THE BIRTHDAY PRISM</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@800&family=Outfit:wght@100;300;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg: #030303;
+            --accent: #ffffff;
+            --heart: #ff2d55;
+            --secondary: #555;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+
+        body {
+            background: var(--bg);
+            color: var(--accent);
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden; /* Locked until preloader finishes */
+        }
+
+        /* --- PRELOADER --- */
+        #preloader {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            z-index: 99999;
+        }
+
+        .heart-wrapper {
+            position: relative;
+            width: 100px; height: 100px;
+        }
+
+        .heart-svg {
+            width: 100%; height: 100%;
+            fill: var(--heart);
+            filter: drop-shadow(0 0 20px var(--heart));
+        }
+
+        .loader-text {
+            margin-top: 20px;
+            font-family: 'Syne', sans-serif;
+            letter-spacing: 5px;
+            font-size: 0.8rem;
+            color: #fff;
+            text-transform: uppercase;
+        }
+
+        .enter-btn {
+            margin-top: 30px;
+            padding: 12px 30px;
+            border: 1px solid #fff;
+            background: transparent;
+            color: #fff;
+            font-family: 'Outfit';
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.3s;
+        }
+
+        .enter-btn:hover { background: #fff; color: #000; }
+
+        /* --- SITE CONTENT --- */
+        .cursor {
+            width: 8px; height: 8px; background: #fff; border-radius: 50%;
+            position: fixed; z-index: 10000; pointer-events: none;
+        }
+        .cursor-ring {
+            width: 40px; height: 40px; border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 50%; position: fixed; z-index: 10000;
+            pointer-events: none; transition: transform 0.15s ease-out;
+        }
+
+        .v-container { position: relative; width: 100%; }
+
+        section {
+            position: relative; width: 100%; height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+
+        .img-container {
+            position: absolute; width: 40vw; height: 60vh;
+            overflow: hidden; border-radius: 4px;
+            z-index: 2; transform: scale(1.2); opacity: 0;
+            will-change: transform, opacity;
+        }
+
+        .img-container img {
+            width: 100%; height: 100%; object-fit: cover;
+            filter: grayscale(20%) contrast(1.1);
+        }
+
+        .text-wrap { position: relative; z-index: 5; text-align: center; pointer-events: none; }
+
+        .title {
+            font-family: 'Syne', sans-serif; font-size: 12vw;
+            line-height: 0.8; text-transform: uppercase;
+            letter-spacing: -0.05em;
+        }
+
+        .sub-text {
+            font-size: 1rem; letter-spacing: 0.5em; text-transform: uppercase;
+            margin-top: 20px; color: var(--secondary);
+        }
+
+        .footer-brand {
+            position: fixed; bottom: 30px; left: 50%;
+            transform: translateX(-50%); z-index: 100;
+            mix-blend-mode: difference;
+        }
+
+        .wa-link {
+            text-decoration: none; color: #fff; font-size: 0.7rem;
+            letter-spacing: 2px; padding: 10px 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 30px; transition: 0.4s;
+        }
+
+        .wa-link:hover { background: #fff; color: #000; }
+
+        .grain {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://grainy-gradients.vercel.app/noise.svg');
+            opacity: 0.04; pointer-events: none; z-index: 999;
+        }
+
+        /* --- SURPRISE ADDITIONS --- */
+        .surprise-btn {
+            position: absolute; bottom: 15%; left: 50%; transform: translateX(-50%);
+            padding: 15px 40px;
+            background: linear-gradient(45deg, #ff2d55, #ffaa00);
+            border: none; border-radius: 50px; color: #fff;
+            font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800;
+            letter-spacing: 3px; text-transform: uppercase; cursor: pointer;
+            opacity: 0; z-index: 20; pointer-events: auto; /* Important so she can click it */
+            box-shadow: 0 10px 30px rgba(255, 45, 85, 0.4);
+            transition: 0.3s ease;
+        }
+
+        .surprise-btn:hover {
+            box-shadow: 0 10px 40px rgba(255, 45, 85, 0.8);
+            letter-spacing: 5px;
+        }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(15px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 100000; opacity: 0; visibility: hidden;
+            pointer-events: none;
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 50px; border-radius: 20px; text-align: center;
+            max-width: 600px; transform: scale(0.8); color: #fff;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .modal-content h2 {
+            font-family: 'Syne', sans-serif; font-size: 3rem; 
+            margin-bottom: 15px; background: linear-gradient(45deg, #ff2d55, #ffaa00);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        .modal-content p {
+            font-size: 1.2rem; line-height: 1.6; margin-bottom: 30px;
+            font-weight: 300;
+        }
+
+        .close-btn {
+            padding: 12px 40px; border: 1px solid #fff; background: transparent;
+            color: #fff; border-radius: 30px; cursor: pointer; transition: 0.3s;
+            font-family: 'Outfit'; text-transform: uppercase; letter-spacing: 2px;
+        }
+
+        .close-btn:hover { background: #fff; color: #000; }
+
+        /* ========================================= */
+        /* --- NEW SUPER AMAZING CSS ADDITIONS --- */
+        /* ========================================= */
+        
+        .ambient-glow {
+            position: fixed; top: 0; left: 0; width: 50vw; height: 50vw;
+            background: radial-gradient(circle, rgba(255, 45, 85, 0.15) 0%, transparent 70%);
+            border-radius: 50%; pointer-events: none; z-index: 1;
+            transform: translate(-50%, -50%); transition: opacity 0.5s ease;
+        }
+
+        .music-particle {
+            position: fixed; bottom: -50px; color: rgba(255, 255, 255, 0.15);
+            font-size: 2rem; pointer-events: none; z-index: 3;
+            animation: floatUp linear infinite; text-shadow: 0 0 10px rgba(255,45,85,0.5);
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) rotate(0deg) scale(0.8); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-120vh) rotate(360deg) scale(1.2); opacity: 0; }
+        }
+
+        @keyframes pulseMagicBtn {
+            0% { box-shadow: 0 0 15px rgba(255, 45, 85, 0.4); }
+            50% { box-shadow: 0 0 35px rgba(255, 170, 0, 0.8), 0 0 15px rgba(255, 45, 85, 0.6); transform: translateX(-50%) scale(1.05); }
+            100% { box-shadow: 0 0 15px rgba(255, 45, 85, 0.4); }
+        }
+
+        .surprise-btn { animation: pulseMagicBtn 2.5s infinite ease-in-out; }
+    </style>
+</head>
+<body>
+<audio id="bgMusic" loop>
+    <source src="music.mp3" type="audio/mpeg">
+</audio>
+
+    <div class="ambient-glow"></div>
+    <div id="particle-universe"></div>
+
+    <div id="preloader">
+        <div class="heart-wrapper">
+            <svg class="heart-svg" viewBox="0 0 32 32">
+                <path d="M16 28.5L14.1 26.8C7.33 20.6 3 16.6 3 11.8C3 7.82 6.12 4.7 10.1 4.7C12.3 4.7 14.4 5.72 15.8 7.33C17.1 5.72 19.3 4.7 21.5 4.7C25.4 4.7 28.5 7.82 28.5 11.8C28.5 16.6 24.2 20.6 17.4 26.8L16 28.5Z"/>
+            </svg>
+        </div>
+        <div class="loader-text">Finding Peace... <span id="progress">0</span>%</div>
+        <button class="enter-btn" id="enterBtn">Enter Experience</button>
+    </div>
+
+    <div class="modal-overlay" id="surpriseModal">
+        <div class="modal-content">
+            <h2>Happy Birthday!</h2>
+            <p>To the girl who brings the beat to life. Keep shining, keep drumming, and keep being the rare gem that you are. I hope this little digital world made your day as amazing as you make everyone else's!</p>
+            <button class="close-btn" id="closeBtn">Close</button>
+        </div>
+    </div>
+
+    <audio id="bgMusic" loop>
+        <source src="https://www.bensound.com/bensound-music/bensound-memories.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="grain"></div>
+    <div class="cursor"></div>
+    <div class="cursor-ring"></div>
+
+    <div class="v-container">
+        <section class="panel">
+            <div class="text-wrap">
+                <h1 class="title t-1">PEACE</h1>
+                <p class="sub-text">She doesn’t just exist… she illuminates.</p>
+            </div>
+            <div class="img-container i-1">
+                <img src="./img/2.jpeg" alt="Peace 1">
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="text-wrap">
+                <h1 class="title t-2">SHINE</h1>
+            </div>
+            <div class="img-container i-2">
+                <img src="./img/3.jpeg" alt="Peace 2">
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="text-wrap">
+                <h1 class="title t-3">GEM</h1>
+            </div>
+            <div class="img-container i-3">
+                <img src="./img/4.jpeg" alt="Peace 3">
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="text-wrap">
+                <h1 class="title t-4">PURE</h1>
+            </div>
+            <div class="img-container i-4">
+                <img src="./img/5.jpeg" alt="Peace 4">
+            </div>
+        </section>
+
+        <section class="panel" id="final-panel">
+            <div class="text-wrap">
+                <h1 class="title t-5">HBD</h1>
+                <p class="sub-text">Drummer Girl🥁</p>
+            </div>
+            <div class="img-container i-5">
+                <img src="img/6.jpeg" alt="Peace 5">
+            </div>
+            <button class="surprise-btn" id="magicBtn">Click for a Surprise 🎁</button>
+        </section>
+    </div>
+
+    <div class="footer-brand">
+        <a href="https://wa.me/2348165623776" class="wa-link" id="mag-btn">Crafted quietly by MhideDev</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+// --- PRELOADER LOGIC ---
+const progressPercent = document.getElementById('progress');
+const enterBtn = document.getElementById('enterBtn');
+const heart = document.querySelector('.heart-svg');
+const music = document.getElementById('bgMusic'); // This targets your music.mp3
+
+const heartbeat = gsap.to(heart, {
+    scale: 1.2, duration: 0.6, repeat: -1, yoyo: true, ease: "power1.inOut"
+});
+
+let loadingProgress = 0;
+const interval = setInterval(() => {
+    loadingProgress += Math.floor(Math.random() * 10) + 1;
+    if (loadingProgress >= 100) {
+        loadingProgress = 100;
+        clearInterval(interval);
+        onLoadComplete();
+    }
+    progressPercent.innerText = loadingProgress;
+}, 150);
+
+function onLoadComplete() {
+    gsap.to('.loader-text', { opacity: 0, duration: 0.5 });
+    gsap.to(enterBtn, { 
+        visibility: 'visible', opacity: 1, y: -10, duration: 1,
+        onComplete: () => heartbeat.timeScale(2.5)
+    });
+}
+
+enterBtn.addEventListener('click', () => {
+    // START MUSIC LOGIC
+    music.volume = 0; 
+    music.play().catch(error => console.log("Playback failed:", error)); 
+    gsap.to(music, { volume: 0.4, duration: 4 }); // Smooth fade-in
+    // END MUSIC LOGIC
+
+    const tl = gsap.timeline();
+    tl.to(heart, { scale: 50, duration: 1.5, ease: "expo.in", opacity: 0 })
+    .to('#preloader', { 
+        opacity: 0, duration: 1,
+        onComplete: () => {
+            document.getElementById('preloader').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            initSiteAnimations();
+            startParticleEngine(); 
+        }
+    }, "-=0.5");
+});
+
+        // --- SITE ANIMATIONS ---
+        function initSiteAnimations() {
+            const panels = gsap.utils.toArray(".panel");
+            
+            panels.forEach((panel, i) => {
+                const img = panel.querySelector(".img-container");
+                const title = panel.querySelector(".title");
+
+                const tl = gsap.timeline({
+                    scrollTrigger: {
+                        trigger: panel, start: "top top", end: "+=100%",
+                        scrub: 1, pin: true, pinSpacing: true
+                    }
+                });
+
+                tl.to(img, { opacity: 1, scale: 1, duration: 1, ease: "power2.out" })
+                  .to(title, { y: -50, opacity: 0.2, duration: 1 }, 0);
+
+                // Fade in the surprise button ONLY on the last panel
+                if(i === panels.length - 1) {
+                    gsap.to("#magicBtn", {
+                        opacity: 1,
+                        y: -30,
+                        duration: 1,
+                        ease: "power3.out",
+                        scrollTrigger: {
+                            trigger: panel,
+                            start: "top center",
+                            toggleActions: "play none none reverse"
+                        }
+                    });
+                }
+            });
+
+            gsap.from(".t-1", { y: 100, opacity: 0, duration: 1.5, ease: "expo.out" });
+        }
+
+        // --- SURPRISE BUTTON LOGIC ---
+        const magicBtn = document.getElementById('magicBtn');
+        const modal = document.getElementById('surpriseModal');
+        const closeBtn = document.getElementById('closeBtn');
+
+        magicBtn.addEventListener('click', () => {
+            // 1. Fire Confetti Cannon!
+            var duration = 3 * 1000;
+            var end = Date.now() + duration;
+
+            (function frame() {
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: ['#ff2d55', '#ffffff', '#ffaa00']
+                });
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: ['#ff2d55', '#ffffff', '#ffaa00']
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+
+            // 2. Show Modal with GSAP
+            gsap.to(modal, { visibility: 'visible', opacity: 1, duration: 0.5, pointerEvents: 'auto' });
+            gsap.to('.modal-content', { scale: 1, duration: 0.5, ease: "back.out(1.7)" });
+        });
+
+        closeBtn.addEventListener('click', () => {
+            gsap.to(modal, { opacity: 0, duration: 0.3, pointerEvents: 'none', onComplete: () => {
+                modal.style.visibility = 'hidden';
+            }});
+            gsap.to('.modal-content', { scale: 0.8, duration: 0.3 });
+        });
+
+        // --- CURSOR & MAGNETIC ---
+        const cursor = document.querySelector(".cursor");
+        const ring = document.querySelector(".cursor-ring");
+
+        window.addEventListener("mousemove", (e) => {
+            gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0 });
+            gsap.to(ring, { x: e.clientX - 20, y: e.clientY - 20, duration: 0.4, ease: "power3.out" });
+        });
+
+        const magBtn = document.querySelector("#mag-btn");
+        magBtn.addEventListener("mousemove", (e) => {
+            const rect = magBtn.getBoundingClientRect();
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
+            gsap.to(magBtn, { x: x * 0.3, y: y * 0.3, duration: 0.3 });
+        });
+        magBtn.addEventListener("mouseleave", () => {
+            gsap.to(magBtn, { x: 0, y: 0, duration: 0.3 });
+        });
+
+        // =========================================
+        // --- NEW SUPER AMAZING JS ADDITIONS ---
+        // =========================================
+
+        // 1. Smooth Ambient Glow following the cursor
+        const ambientGlow = document.querySelector('.ambient-glow');
+        window.addEventListener("mousemove", (e) => {
+            gsap.to(ambientGlow, { x: e.clientX, y: e.clientY, duration: 3, ease: "power2.out" });
+        });
+
+        // 2. Drummer Girl Floating Particles (Starts after preloader)
+        function startParticleEngine() {
+            const universe = document.getElementById('particle-universe');
+            const icons = ['♪', '♫', '♬', '♩', '🥁', '✨'];
+            
+            setInterval(() => {
+                const particle = document.createElement('div');
+                particle.classList.add('music-particle');
+                particle.innerText = icons[Math.floor(Math.random() * icons.length)];
+                
+                // Randomize position, size, and speed
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.fontSize = (Math.random() * 1.5 + 1) + 'rem';
+                particle.style.animationDuration = (Math.random() * 6 + 6) + 's';
+                
+                universe.appendChild(particle);
+                
+                // Clean up DOM after animation completes
+                setTimeout(() => { particle.remove(); }, 12000);
+            }, 600); // Spawns a new particle every 0.6 seconds
+        }
+    </script>
+</body>
+</html>
