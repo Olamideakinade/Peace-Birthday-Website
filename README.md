@@ -39,4 +39,5 @@ This project is built with **HTML, CSS, JavaScript**, and **GSAP** for premium s
 
 ---
 
-## 📂 File Structure
+
+<img src="IMG_1660.jpeg" alt="Peace Birthday Cover" width="600">
